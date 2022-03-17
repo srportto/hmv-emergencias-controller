@@ -3,6 +3,7 @@ package br.com.hmv.services;
 import br.com.hmv.dtos.request.SintomaRequestDTO;
 import br.com.hmv.dtos.request.SintomaUpdateScoreRequestDTO;
 import br.com.hmv.dtos.responses.SintomaDefaultResponseDTO;
+import br.com.hmv.exceptions.DatabaseException;
 import br.com.hmv.exceptions.ResourceNotFoundException;
 import br.com.hmv.models.entities.Sintoma;
 import br.com.hmv.models.mappers.SintomaMapper;
@@ -10,6 +11,8 @@ import br.com.hmv.repositories.SintomaRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,7 @@ public class SintomaService {
         var entity = dtoToEntityOnCreate(dto);
         entity = sintomaRepository.save(entity);
 
-        logger.info("{} - Convenio incluido com sucesso {}", logCode, entity);
+        logger.info("{} - recurso incluido com sucesso {}", logCode, entity);
         return entityToResponseDtoInsert(entity);
     }
 
@@ -68,7 +71,6 @@ public class SintomaService {
         return list.map(itemFuncionarioEntity -> SintomaMapper.INSTANCE.deEntityParaDto(itemFuncionarioEntity));
     }
 
-
     @Transactional(readOnly = true)
     public SintomaDefaultResponseDTO findByIdSintoma(Long idSintoma) {
         String logCode = "findByIdSintoma(Long)";
@@ -79,6 +81,29 @@ public class SintomaService {
 
         logger.info("{} - recurso encontrado: {}", logCode, entity);
         return SintomaMapper.INSTANCE.deEntityParaDto(entity);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        String logCode = "delete(Long)";
+        logger.info("{} - deletando recurso: {}", logCode, id);
+
+        try {
+            sintomaRepository.deleteById(id);
+            logger.info("{} - recurso deletado com sucesso: {}", logCode, id);
+
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("{} - recurso nao encontrado: {}", logCode, id);
+            throw new ResourceNotFoundException("Convenio nao encontrado id: " + id);
+
+        } catch (DataIntegrityViolationException e) {
+            logger.warn("{} - erro de integridade de dados: {}", logCode, id);
+            throw new DatabaseException("Integrity violation - Ao deletar convenio id: " + id);
+
+        } catch (Exception e) {
+            logger.warn("{} - erro ao processar requisicao: {}", logCode, id);
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     private Sintoma dtoToEntityOnCreate(SintomaRequestDTO dto) {

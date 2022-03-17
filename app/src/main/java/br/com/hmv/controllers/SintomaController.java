@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,7 +65,6 @@ public class SintomaController {
         return ResponseEntity.ok().body(responseDTO);
     }
 
-
     @GetMapping
     public ResponseEntity<Page<SintomaDefaultResponseDTO>> findAll(Pageable pageable) {
         String logCode = "findAll(Pageable)";
@@ -74,5 +74,16 @@ public class SintomaController {
 
         logger.info("{} - solicitacao de consulta todos paginada realizada com sucesso{}", logCode, pageable);
         return ResponseEntity.ok().body(responseDtoInList);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        String logCode = "delete(Long)";
+        logger.info("{} - solicitacao de delete {}", logCode, id);
+
+        service.delete(id);
+
+        logger.info("{} - solicitacao de delete realizada com sucesso {}", logCode, id);
+        return ResponseEntity.noContent().build();
     }
 }
