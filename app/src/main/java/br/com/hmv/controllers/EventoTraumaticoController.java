@@ -1,10 +1,9 @@
 package br.com.hmv.controllers;
 
-import br.com.hmv.dtos.request.SintomaRequestDTO;
-import br.com.hmv.dtos.request.SintomaUpdateScoreRequestDTO;
-import br.com.hmv.dtos.responses.FuncionarioForListResponseDTO;
-import br.com.hmv.dtos.responses.SintomaDefaultResponseDTO;
-import br.com.hmv.services.SintomasService;
+import br.com.hmv.dtos.request.EventoTraumaticoRequestDTO;
+import br.com.hmv.dtos.request.EventoTraumaticoUpdateScoreRequestDTO;
+import br.com.hmv.dtos.responses.EventoTraumaticoDefaultResponseDTO;
+import br.com.hmv.services.EventoTraumaticoService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +23,15 @@ import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
-@RequestMapping(value = "api/sintomas")
+@RequestMapping(value = "api/eventos_traumaticos")
 @AllArgsConstructor
-public class SintomasController {
-    private static Logger logger = LoggerFactory.getLogger(SintomasController.class);
-    private SintomasService service;
+public class EventoTraumaticoController {
+    private static Logger logger = LoggerFactory.getLogger(EventoTraumaticoController.class);
+    private EventoTraumaticoService service;
 
     @PostMapping
-    public ResponseEntity<SintomaDefaultResponseDTO> insert(@RequestBody @Valid SintomaRequestDTO requestDTO) {
-        String logCode = "insert(SintomaRequestDTO)";
+    public ResponseEntity<EventoTraumaticoDefaultResponseDTO> insert(@RequestBody @Valid EventoTraumaticoRequestDTO requestDTO) {
+        String logCode = "insert(EventoTraumaticoRequestDTO)";
         logger.info("{} - solicitacao de inclusao {}", logCode, requestDTO);
 
         var responseDTO = service.criacao(requestDTO);
@@ -44,22 +43,22 @@ public class SintomasController {
     }
 
     @PatchMapping(value = "/{id}/score")
-    public ResponseEntity<SintomaDefaultResponseDTO> updateScore(@PathVariable Long id, @RequestBody @Valid SintomaUpdateScoreRequestDTO requestDTO) {
-        String logCode = "updateScore(Long, SintomaUpdateScoreRequestDTO)";
+    public ResponseEntity<EventoTraumaticoDefaultResponseDTO> updateScore(@PathVariable Long id, @RequestBody @Valid EventoTraumaticoUpdateScoreRequestDTO requestDTO) {
+        String logCode = "updateScore(Long, EventoTraumaticoUpdateScoreRequestDTO)";
         logger.info("{} - solicitacao de atualizacao de dados {}", logCode, requestDTO);
 
-        SintomaDefaultResponseDTO responseDTO = service.updateScore(id, requestDTO);
+        EventoTraumaticoDefaultResponseDTO responseDTO = service.updateScore(id, requestDTO);
 
         logger.info("{} - solicitacao de atualizacao concluida com sucesso {}", logCode, requestDTO);
         return ResponseEntity.ok().body(responseDTO);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<SintomaDefaultResponseDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<EventoTraumaticoDefaultResponseDTO> findById(@PathVariable Long id) {
         String logCode = "findById(Long)";
         logger.info("{} - solicitacao de consulta detalhe {}", logCode, id);
 
-        SintomaDefaultResponseDTO responseDTO = service.findByIdSintoma(id);
+        EventoTraumaticoDefaultResponseDTO responseDTO = service.findByIdEventoTraumatico(id);
 
         logger.info("{} - solicitacao de consulta detalhe realizada com sucesso {}", logCode, responseDTO);
         return ResponseEntity.ok().body(responseDTO);
@@ -67,11 +66,11 @@ public class SintomasController {
 
 
     @GetMapping
-    public ResponseEntity<Page<SintomaDefaultResponseDTO>> findAll(Pageable pageable) {
+    public ResponseEntity<Page<EventoTraumaticoDefaultResponseDTO>> findAll(Pageable pageable) {
         String logCode = "findAll(Pageable)";
         logger.info("{} - solicitacao de consulta todos paginada {}", logCode, pageable);
 
-        Page<SintomaDefaultResponseDTO> responseDtoInList = service.findAllPaged(pageable);
+        Page<EventoTraumaticoDefaultResponseDTO> responseDtoInList = service.findAllPaged(pageable);
 
         logger.info("{} - solicitacao de consulta todos paginada realizada com sucesso{}", logCode, pageable);
         return ResponseEntity.ok().body(responseDtoInList);

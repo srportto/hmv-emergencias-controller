@@ -4,9 +4,9 @@ import br.com.hmv.dtos.request.SintomaRequestDTO;
 import br.com.hmv.dtos.request.SintomaUpdateScoreRequestDTO;
 import br.com.hmv.dtos.responses.SintomaDefaultResponseDTO;
 import br.com.hmv.exceptions.ResourceNotFoundException;
-import br.com.hmv.models.entities.Sintomas;
-import br.com.hmv.models.mappers.SintomasMapper;
-import br.com.hmv.repositories.SintomasRepository;
+import br.com.hmv.models.entities.Sintoma;
+import br.com.hmv.models.mappers.SintomaMapper;
+import br.com.hmv.repositories.SintomaRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +20,9 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class SintomasService {
-    private static Logger logger = LoggerFactory.getLogger(SintomasService.class);
-    private SintomasRepository sintomasRepository;
+public class SintomaService {
+    private static Logger logger = LoggerFactory.getLogger(SintomaService.class);
+    private SintomaRepository sintomaRepository;
 
     @Transactional
     public SintomaDefaultResponseDTO criacao(SintomaRequestDTO dto) {
@@ -30,7 +30,7 @@ public class SintomasService {
         logger.info("{} - solicitacao de inclusao {}", logCode, dto);
 
         var entity = dtoToEntityOnCreate(dto);
-        entity = sintomasRepository.save(entity);
+        entity = sintomaRepository.save(entity);
 
         logger.info("{} - Convenio incluido com sucesso {}", logCode, entity);
         return entityToResponseDtoInsert(entity);
@@ -42,14 +42,14 @@ public class SintomasService {
         logger.info("{} - solicitacao de atualizacao de score do sintoma {}", logCode, dto);
 
         try {
-            var objOptional = sintomasRepository.findById(idSintoma);
-            Sintomas entity = objOptional.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + idSintoma));
+            var objOptional = sintomaRepository.findById(idSintoma);
+            Sintoma entity = objOptional.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + idSintoma));
 
             entity.setScore(dto.getScore());
-            var entityAtualizada = sintomasRepository.save(entity);
+            var entityAtualizada = sintomaRepository.save(entity);
 
             logger.info("{} - atualizacao realizada com sucesso {}", logCode, entityAtualizada);
-            return SintomasMapper.INSTANCE.deEntityParaDto(entityAtualizada);
+            return SintomaMapper.INSTANCE.deEntityParaDto(entityAtualizada);
 
         } catch (EntityNotFoundException e) {
             logger.warn("{} - recurso nao encontrado id: {} ", idSintoma);
@@ -63,9 +63,9 @@ public class SintomasService {
         String logCode = "findAllPaged(Pageable)";
         logger.info("{} - consulta paginada de recursos vide parametros {}", logCode, pageable);
 
-        Page<Sintomas> list = sintomasRepository.findAll(pageable);
+        Page<Sintoma> list = sintomaRepository.findAll(pageable);
         logger.info("{} - consulta paginada de recursos realizada com sucesso: {}", logCode, list);
-        return list.map(itemFuncionarioEntity -> SintomasMapper.INSTANCE.deEntityParaDto(itemFuncionarioEntity));
+        return list.map(itemFuncionarioEntity -> SintomaMapper.INSTANCE.deEntityParaDto(itemFuncionarioEntity));
     }
 
 
@@ -74,28 +74,28 @@ public class SintomasService {
         String logCode = "findByIdSintoma(Long)";
         logger.info("{} - buscando recurso pelo id: {}", logCode, idSintoma);
 
-        Optional<Sintomas> obj = sintomasRepository.findById(idSintoma);
-        Sintomas entity = obj.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + idSintoma));
+        Optional<Sintoma> obj = sintomaRepository.findById(idSintoma);
+        Sintoma entity = obj.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + idSintoma));
 
         logger.info("{} - recurso encontrado: {}", logCode, entity);
-        return SintomasMapper.INSTANCE.deEntityParaDto(entity);
+        return SintomaMapper.INSTANCE.deEntityParaDto(entity);
     }
 
-    private Sintomas dtoToEntityOnCreate(SintomaRequestDTO dto) {
+    private Sintoma dtoToEntityOnCreate(SintomaRequestDTO dto) {
         String logCode = "dtoToEntityOnCreate(SintomaRequestDTO)";
         logger.info("{} - convertendo dto de cricao para entity {}", logCode, dto);
 
-        var entity = SintomasMapper.INSTANCE.deDtoParaEntity(dto);
+        var entity = SintomaMapper.INSTANCE.deDtoParaEntity(dto);
 
         logger.info("{} - conversao realizada com sucesso {}", logCode, entity);
         return entity;
     }
 
-    private SintomaDefaultResponseDTO entityToResponseDtoInsert(Sintomas entity) {
+    private SintomaDefaultResponseDTO entityToResponseDtoInsert(Sintoma entity) {
         String logCode = "entityToResponseDefault(Sintomas)";
         logger.info("{} - convertendo entity para response default {}", logCode, entity);
 
-        var responseDto = SintomasMapper.INSTANCE.deEntityParaDto(entity);
+        var responseDto = SintomaMapper.INSTANCE.deEntityParaDto(entity);
         logger.info("{} - response default montado com sucesso {}", logCode, responseDto);
         return responseDto;
     }
