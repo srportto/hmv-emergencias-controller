@@ -49,7 +49,7 @@ public class DetalheDoPedidoDeAtendimento implements Serializable {
             joinColumns = @JoinColumn(name = "pedido_id"),
             inverseJoinColumns = @JoinColumn(name = "dor_id")
     )
-    Set<Dor> dores = new HashSet<>();
+    Set<RegiaoDorEscala> dores = new HashSet<>();
 
 
     @ManyToMany

@@ -18,8 +18,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_dores")
-public class Dor implements Serializable {
+@Table(name = "tb_regiao_escala_dor")
+public class RegiaoDorEscala implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @EqualsAndHashCode.Include

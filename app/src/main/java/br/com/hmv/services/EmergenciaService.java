@@ -2,12 +2,16 @@ package br.com.hmv.services;
 
 import br.com.hmv.dtos.request.EmergenciaInsertRequestDTO;
 import br.com.hmv.dtos.responses.EmergenciaDefaultResponseDTO;
-import br.com.hmv.models.entities.Dor;
+import br.com.hmv.exceptions.ResourceNotFoundException;
 import br.com.hmv.models.entities.Emergencia;
+import br.com.hmv.models.entities.RegiaoDorEscala;
+import br.com.hmv.models.enums.ScoreEscalaDeDorDoPacienteEnum;
+import br.com.hmv.models.enums.ScoreRegiaoDorEnum;
 import br.com.hmv.models.mappers.EmergenciaMapper;
 import br.com.hmv.repositories.EmergenciaRepository;
 import br.com.hmv.repositories.EventoTraumaticoRepository;
 import br.com.hmv.repositories.HabitoPacienteRepository;
+import br.com.hmv.repositories.RegiaoDorEscalaRepository;
 import br.com.hmv.repositories.SintomaRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -25,6 +29,7 @@ public class EmergenciaService {
     private SintomaRepository sintomaRepository;
     private HabitoPacienteRepository habitoPacienteRepository;
     private EventoTraumaticoRepository eventoTraumaticoRepository;
+    private RegiaoDorEscalaRepository regiaoDorEscalaRepository;
 
     @Transactional
     public EmergenciaDefaultResponseDTO criacao(EmergenciaInsertRequestDTO dto) {
@@ -122,11 +127,18 @@ public class EmergenciaService {
             entity.getDetalhesPedidoAtendimento().getDores().clear();
 
             dores.forEach(itemDores -> {
-                var dor = new Dor();
-                dor.setCodigoRegiaoDor(itemDores.getRegiaoDor().getCodigoRegiaoDor());
-                dor.setCodigoEscalaDor(itemDores.getEscalaDeDorDoPaciente().getCodigoEscalaDeDor());
+                var codigoRegiaoDor = itemDores.getRegiaoDor().getCodigoRegiaoDor();
+                var codigoEscalaDor = itemDores.getEscalaDeDorDoPaciente().getCodigoEscalaDeDor();
 
-                entity.getDetalhesPedidoAtendimento().getDores().add(dor);
+                var objOptional = regiaoDorEscalaRepository.findRegiaoDorEscalaByCodigoRegiaoDorAndCodigoEscalaDor(codigoRegiaoDor, codigoEscalaDor);
+
+                if (objOptional.isPresent()) {
+                    var regiaEscalaDor = objOptional.get();
+                    entity.getDetalhesPedidoAtendimento().getDores().add(regiaEscalaDor);
+
+                } else {
+                    throw new ResourceNotFoundException("Regiao e escada de dor nao encontradas");
+                }
             });
         }
 
@@ -177,6 +189,30 @@ public class EmergenciaService {
         var responseDto = EmergenciaMapper.INSTANCE.deEntityParaDtoDefault(entity);
         logger.info("{} - response default montado com sucesso {}", logCode, responseDto);
         return responseDto;
+    }
+
+    public void populaTabelaDeDor() {
+        String logCode = "populaTabelaDeDor()";
+        logger.info("{} - percorrendo enum ScoreRegiaoDor {}", logCode, ScoreRegiaoDorEnum.values());
+
+        for (ScoreRegiaoDorEnum itemRegiaoDor : ScoreRegiaoDorEnum.values()) {
+            for (ScoreEscalaDeDorDoPacienteEnum itemEscalaDor : ScoreEscalaDeDorDoPacienteEnum.values()) {
+
+                var codigoRegiaoDor = itemRegiaoDor.getCodigoRegiaoDor();
+                var codigoEscalaDor = itemEscalaDor.getCodigoEscalaDeDor();
+
+                var objOptional = regiaoDorEscalaRepository.findRegiaoDorEscalaByCodigoRegiaoDorAndCodigoEscalaDor(codigoRegiaoDor, codigoEscalaDor);
+
+                if (!objOptional.isPresent()) {
+                    var entityRegiaoDorEscala = new RegiaoDorEscala();
+                    entityRegiaoDorEscala.setCodigoRegiaoDor(codigoRegiaoDor);
+                    entityRegiaoDorEscala.setCodigoEscalaDor(codigoEscalaDor);
+                    regiaoDorEscalaRepository.save(entityRegiaoDorEscala);
+                }
+            }
+        }
+
+        logger.info("{} - tabela de regiaodor vs escala de dor populada com sucesso {}", logCode, ScoreRegiaoDorEnum.values());
     }
 
 }
