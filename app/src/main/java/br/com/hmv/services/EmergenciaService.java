@@ -1,7 +1,11 @@
 package br.com.hmv.services;
 
 import br.com.hmv.dtos.request.EmergenciaInsertRequestDTO;
+import br.com.hmv.dtos.responses.DorDefaultResponseDTO;
 import br.com.hmv.dtos.responses.EmergenciaDefaultResponseDTO;
+import br.com.hmv.dtos.responses.EventoTraumaticoEmergenciaDefaultResponsetDTO;
+import br.com.hmv.dtos.responses.HabitoPacienteEmergenciaDefaultResponsetDTO;
+import br.com.hmv.dtos.responses.SintomaEmergenciaDefaultResponsetDTO;
 import br.com.hmv.exceptions.ResourceNotFoundException;
 import br.com.hmv.models.entities.Emergencia;
 import br.com.hmv.models.entities.RegiaoDorEscala;
@@ -33,7 +37,7 @@ public class EmergenciaService {
 
     @Transactional
     public EmergenciaDefaultResponseDTO criacao(EmergenciaInsertRequestDTO dto) {
-        String logCode = "criacao(SintomaRequestDTO)";
+        String logCode = "criacao(EmergenciaInsertRequestDTO)";
         logger.info("{} - solicitacao de inclusao {}", logCode, dto);
 
         var entity = dtoToEntityOnCreate(dto);
@@ -117,6 +121,7 @@ public class EmergenciaService {
         var entity = EmergenciaMapper.INSTANCE.deDtoParaEntity(dto);
         entity.setCodigoEmergencia(UUID.randomUUID().toString());
         entity.getDetalhesPedidoAtendimento().setDataNascimentoPaciente(dto.getDetalhesPedidoAtendimento().getDataNascimento());
+        entity.getDetalhesPedidoAtendimento().setRelatoEmTextoDoPedidoDeAtendimento(dto.getDetalhesPedidoAtendimento().getRelatoMotivoPedidoAtendimento());
         entity.getDetalhesPedidoAtendimento().setCodigoDetalhesPedido(UUID.randomUUID().toString());
         entity.setCodigoStatusEmergencia(dto.getStatusEmergencia().getCodigoStatusEmergencia());
         entity.setScore(9999);
@@ -137,7 +142,7 @@ public class EmergenciaService {
                     entity.getDetalhesPedidoAtendimento().getDores().add(regiaEscalaDor);
 
                 } else {
-                    throw new ResourceNotFoundException("Regiao e escada de dor nao encontradas");
+                    throw new ResourceNotFoundException("Regiao e escala de dor nao encontradas");
                 }
             });
         }
@@ -187,6 +192,52 @@ public class EmergenciaService {
         logger.info("{} - convertendo entity para response default {}", logCode, entity);
 
         var responseDto = EmergenciaMapper.INSTANCE.deEntityParaDtoDefault(entity);
+
+        if (entity.getDetalhesPedidoAtendimento().getDores() != null) {
+            var doresEntity = entity.getDetalhesPedidoAtendimento().getDores();
+
+            doresEntity.forEach(itemRegiaoEscalaDor -> {
+                var regiaoDor = ScoreRegiaoDorEnum.obterRegiaoDor(itemRegiaoEscalaDor.getCodigoRegiaoDor());
+                var escalaDor = ScoreEscalaDeDorDoPacienteEnum.obterEscalaDeDor(itemRegiaoEscalaDor.getCodigoEscalaDor());
+
+                responseDto.getDetalhesPedidoAtendimento().getDores().add(new DorDefaultResponseDTO(regiaoDor, escalaDor));
+            });
+        }
+
+        if (entity.getDetalhesPedidoAtendimento().getSintomas() != null) {
+            var sintomasEntity = entity.getDetalhesPedidoAtendimento().getSintomas();
+
+            sintomasEntity.forEach(itemEntity -> {
+                var idEntity = itemEntity.getId();
+                var descricao = itemEntity.getDescricao();
+
+                responseDto.getDetalhesPedidoAtendimento().getSintomas().add(new SintomaEmergenciaDefaultResponsetDTO(idEntity, descricao));
+            });
+        }
+
+
+        if (entity.getDetalhesPedidoAtendimento().getHabitosPaciente() != null) {
+            var habitosEntity = entity.getDetalhesPedidoAtendimento().getHabitosPaciente();
+
+            habitosEntity.forEach(itemEntity -> {
+                var idEntity = itemEntity.getId();
+                var descricao = itemEntity.getDescricao();
+
+                responseDto.getDetalhesPedidoAtendimento().getHabitosPaciente().add(new HabitoPacienteEmergenciaDefaultResponsetDTO(idEntity, descricao));
+            });
+        }
+
+        if (entity.getDetalhesPedidoAtendimento().getEventosTraumaticos() != null) {
+            var eventostraumaticosEntity = entity.getDetalhesPedidoAtendimento().getEventosTraumaticos();
+
+            eventostraumaticosEntity.forEach(itemEntity -> {
+                var idEntity = itemEntity.getId();
+                var descricao = itemEntity.getDescricao();
+
+                responseDto.getDetalhesPedidoAtendimento().getEventosTraumaticos().add(new EventoTraumaticoEmergenciaDefaultResponsetDTO(idEntity, descricao));
+            });
+        }
+
         logger.info("{} - response default montado com sucesso {}", logCode, responseDto);
         return responseDto;
     }
@@ -212,7 +263,7 @@ public class EmergenciaService {
             }
         }
 
-        logger.info("{} - tabela de regiaodor vs escala de dor populada com sucesso {}", logCode, ScoreRegiaoDorEnum.values());
+        logger.info("{} - tabela de regiao vs escala de dor populada com sucesso {}", logCode, ScoreRegiaoDorEnum.values());
     }
 
 }

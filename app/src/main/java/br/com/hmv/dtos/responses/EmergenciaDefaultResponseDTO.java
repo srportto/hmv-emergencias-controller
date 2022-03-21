@@ -1,6 +1,5 @@
 package br.com.hmv.dtos.responses;
 
-import br.com.hmv.dtos.request.DetalhePedidoAtendimentoRequestDTO;
 import br.com.hmv.models.enums.StatusEmergenciaEnum;
 import br.com.hmv.services.validation.emergencias.criacao.EmergenciaInsertValid;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,10 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @Builder
 @NoArgsConstructor
@@ -37,7 +32,7 @@ public class EmergenciaDefaultResponseDTO {
     private StatusEmergenciaEnum statusEmergencia;
 
 
-    private DetalhePedidoAtendimentoRequestDTO detalhesPedidoAtendimento;
+    private DetalhePedidoAtendimentoDefaultResponseDTO detalhesPedidoAtendimento;
 
 
 }
