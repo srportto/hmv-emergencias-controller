@@ -73,25 +73,25 @@ public class EmergenciaService {
 //        }
 //    }
 //
-//
-//    @Transactional(readOnly = true)
-//    public Page<SintomaDefaultResponseDTO> findAllPaged(Pageable pageable) {
-//        String logCode = "findAllPaged(Pageable)";
-//        logger.info("{} - consulta paginada de recursos vide parametros {}", logCode, pageable);
-//
-//        Page<Sintoma> list = sintomaRepository.findAll(pageable);
-//        logger.info("{} - consulta paginada de recursos realizada com sucesso: {}", logCode, list);
-//        return list.map(itemFuncionarioEntity -> SintomaMapper.INSTANCE.deEntityParaDto(itemFuncionarioEntity));
-//    }
-//
+
+    @Transactional(readOnly = true)
+    public Page<EmergenciaForListResponseDTO> findAllPaged(Pageable pageable) {
+        String logCode = "findAllPaged(Pageable)";
+        logger.info("{} - consulta paginada de recursos vide parametros {}", logCode, pageable);
+
+        Page<Emergencia> list = emergenciaRepository.findAll(pageable);
+        logger.info("{} - consulta paginada de recursos realizada com sucesso: {}", logCode, list);
+        return list.map(itemEmergenciaEntity -> EmergenciaMapper.INSTANCE.deEntityParaListDto(itemEmergenciaEntity));
+    }
+
     @Transactional(readOnly = true)
     public Page<EmergenciaForListResponseDTO> findAllPagedPorStatusEmergencia(StatusEmergenciaEnum statusEmergencia, Pageable pageable) {
         String logCode = "findAllPagedPorStatusEmergencia(StatusEmergenciaEnum,Pageable)";
-        logger.info("{} - consulta paginada de recursos vide parametros {} e grupo funcao {}", logCode, pageable, statusEmergencia);
+        logger.info("{} - consulta paginada de recursos vide parametros {} e status {}", logCode, pageable, statusEmergencia);
 
         var codigoStatusEmergencia = statusEmergencia.getCodigoStatusEmergencia();
         Page<Emergencia> list = emergenciaRepository.findEmergenciaByCodigoStatusEmergencia(codigoStatusEmergencia, pageable);
-        logger.info("{} - consulta paginada de recursos por grupo de funcao realizada com sucesso: {}", logCode, list);
+        logger.info("{} - consulta paginada de recursos por status realizada com sucesso: {}", logCode, list);
         return list.map(itemEmergenciaEntity -> EmergenciaMapper.INSTANCE.deEntityParaListDto(itemEmergenciaEntity));
     }
 

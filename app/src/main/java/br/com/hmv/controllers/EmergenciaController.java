@@ -54,6 +54,17 @@ public class EmergenciaController {
         return ResponseEntity.ok().body(responseDTO);
     }
 
+    @GetMapping
+    public ResponseEntity<Page<EmergenciaForListResponseDTO>> findAll(Pageable pageable) {
+        String logCode = "findAll(Pageable)";
+        logger.info("{} - solicitacao de consulta todos paginada {} ", logCode, pageable);
+
+        Page<EmergenciaForListResponseDTO> responseDtoInList = service.findAllPaged(pageable);
+
+        logger.info("{} - solicitacao de consulta todos paginada realizada com sucesso{}", logCode, pageable);
+        return ResponseEntity.ok().body(responseDtoInList);
+    }
+
     @GetMapping(value = "/status")
     public ResponseEntity<Page<EmergenciaForListResponseDTO>> findAllByStatusEmergencia(@RequestParam StatusEmergenciaEnum status, Pageable pageable) {
         String logCode = "findAllByStatusEmergencia(StatusEmergenciaEnum,Pageable)";
