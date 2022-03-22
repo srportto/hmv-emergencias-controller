@@ -14,4 +14,6 @@ public interface EmergenciaRepository extends JpaRepository<Emergencia, Long> {
     Optional<Emergencia> findEmergenciaByCodigoEmergencia(String codigoEmergencia);
 
     Page<Emergencia> findEmergenciaByCodigoStatusEmergencia(Long codigoStatusEmergencia, Pageable pageable);
+
+    void deleteByCodigoEmergencia(String codigoEmergencia);
 }

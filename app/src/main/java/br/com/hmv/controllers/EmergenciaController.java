@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,6 +75,18 @@ public class EmergenciaController {
 
         logger.info("{} - solicitacao de consulta todos paginada realizada com sucesso{}", logCode, pageable);
         return ResponseEntity.ok().body(responseDtoInList);
+    }
+
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        String logCode = "delete(String)";
+        logger.info("{} - solicitacao de delete {}", logCode, id);
+
+        service.delete(id);
+
+        logger.info("{} - solicitacao de delete realizada com sucesso {}", logCode, id);
+        return ResponseEntity.noContent().build();
     }
 
 
