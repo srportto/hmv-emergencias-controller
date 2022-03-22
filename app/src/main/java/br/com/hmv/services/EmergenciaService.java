@@ -1,6 +1,7 @@
 package br.com.hmv.services;
 
 import br.com.hmv.dtos.request.EmergenciaInsertRequestDTO;
+import br.com.hmv.dtos.request.EmergenciaUpdateStatusRequestDTO;
 import br.com.hmv.dtos.responses.DorDefaultResponseDTO;
 import br.com.hmv.dtos.responses.EmergenciaDefaultResponseDTO;
 import br.com.hmv.dtos.responses.EmergenciaForListResponseDTO;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,27 +57,28 @@ public class EmergenciaService {
         return entityToDefaultResponseDto(entity);
     }
 
-    //    @Transactional
-//    public SintomaDefaultResponseDTO updateScore(Long codigoEmergencia, SintomaUpdateScoreRequestDTO dto) {
-//        String logCode = "updateScore(String, SintomaUpdateScoreRequestDTO)";
-//        logger.info("{} - solicitacao de atualizacao de score do sintoma {}", logCode, dto);
-//
-//        try {
-//            var objOptional = sintomaRepository.findById(codigoEmergencia);
-//            Sintoma entity = objOptional.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + codigoEmergencia));
-//
-//            entity.setScore(dto.getScore());
-//            var entityAtualizada = sintomaRepository.save(entity);
-//
-//            logger.info("{} - atualizacao realizada com sucesso {}", logCode, entityAtualizada);
-//            return SintomaMapper.INSTANCE.deEntityParaDto(entityAtualizada);
-//
-//        } catch (EntityNotFoundException e) {
-//            logger.warn("{} - recurso nao encontrado id: {} ", codigoEmergencia);
-//            throw new ResourceNotFoundException("Recurso nao encontrado id: " + codigoEmergencia);
-//        }
-//    }
-//
+    @Transactional
+    public EmergenciaDefaultResponseDTO updateStatus(String idEmergencia, EmergenciaUpdateStatusRequestDTO dto) {
+        String logCode = "updateStatus(String, EmergenciaUpdateStatusRequestDTO)";
+        logger.info("{} - solicitacao de atualizacao de status da emergencia para  {}", logCode, dto);
+
+        try {
+            var objOptional = emergenciaRepository.findEmergenciaByCodigoEmergencia(idEmergencia);
+            Emergencia entity = objOptional.orElseThrow(() -> new ResourceNotFoundException("recurso nao encontrado id: " + idEmergencia));
+
+            var codigoStatusAtualizado = dto.getStatus().getCodigoStatusEmergencia();
+            entity.setCodigoStatusEmergencia(codigoStatusAtualizado);
+
+            var entityAtualizada = emergenciaRepository.save(entity);
+
+            logger.info("{} - atualizacao realizada com sucesso {}", logCode, entityAtualizada);
+            return entityToDefaultResponseDto(entityAtualizada);
+
+        } catch (EntityNotFoundException e) {
+            logger.warn("{} - recurso nao encontrado id: {} ", idEmergencia);
+            throw new ResourceNotFoundException("Recurso nao encontrado id: " + idEmergencia);
+        }
+    }
 
     @Transactional(readOnly = true)
     public Page<EmergenciaForListResponseDTO> findAllPaged(Pageable pageable) {

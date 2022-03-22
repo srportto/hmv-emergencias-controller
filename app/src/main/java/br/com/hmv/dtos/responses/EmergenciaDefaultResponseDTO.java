@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @Data
 @EmergenciaInsertValid
 public class EmergenciaDefaultResponseDTO {
+
     @JsonProperty("codigo_emergencia")
     private String codigoEmergencia;
 
     @JsonProperty("id_paciente")
     private String idPaciente;
-
 
     @JsonProperty("primeiro_nome_paciente")
     private String primeiroNomePaciente;
@@ -27,10 +27,10 @@ public class EmergenciaDefaultResponseDTO {
     @JsonProperty("score_prioridade")
     private Integer score;
 
-
     @JsonProperty("status")
     private StatusEmergenciaEnum statusEmergencia;
 
+    @JsonProperty("detalhes_pedido_atendimento")
     private DetalhePedidoAtendimentoDefaultResponseDTO detalhesPedidoAtendimento;
 
 }

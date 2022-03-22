@@ -1,6 +1,7 @@
 package br.com.hmv.controllers;
 
 import br.com.hmv.dtos.request.EmergenciaInsertRequestDTO;
+import br.com.hmv.dtos.request.EmergenciaUpdateStatusRequestDTO;
 import br.com.hmv.dtos.responses.EmergenciaDefaultResponseDTO;
 import br.com.hmv.dtos.responses.EmergenciaForListResponseDTO;
 import br.com.hmv.models.enums.StatusEmergenciaEnum;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,6 +79,16 @@ public class EmergenciaController {
         return ResponseEntity.ok().body(responseDtoInList);
     }
 
+    @PatchMapping(value = "/{id}/status")
+    public ResponseEntity<EmergenciaDefaultResponseDTO> updateStatusEmergencia(@PathVariable String id, @RequestBody EmergenciaUpdateStatusRequestDTO status) {
+        String logCode = "updateStatusEmergencia(String)";
+        logger.info("{} - solicitacao de atualizacao de status da emergencia {} para {}", logCode, id, status);
+
+        EmergenciaDefaultResponseDTO responseDto = service.updateStatus(id, status);
+
+        logger.info("{} - solicitacao de atualizacao de status realizada com sucesso{}", logCode, responseDto);
+        return ResponseEntity.ok().body(responseDto);
+    }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
@@ -88,6 +100,5 @@ public class EmergenciaController {
         logger.info("{} - solicitacao de delete realizada com sucesso {}", logCode, id);
         return ResponseEntity.noContent().build();
     }
-
 
 }

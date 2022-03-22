@@ -28,9 +28,9 @@ public class DetalhePedidoAtendimentoDefaultResponseDTO {
 
     private List<SintomaEmergenciaDefaultResponsetDTO> sintomas = new ArrayList<>();
 
+    @JsonProperty("habitos_paciente")
     private List<HabitoPacienteEmergenciaDefaultResponsetDTO> habitosPaciente = new ArrayList<>();
 
+    @JsonProperty("eventos_traumaticos;")
     private List<EventoTraumaticoEmergenciaDefaultResponsetDTO> eventosTraumaticos;
-
-
 }
