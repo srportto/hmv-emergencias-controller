@@ -1,5 +1,8 @@
 package br.com.hmv.models.enums;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -40,6 +43,10 @@ public enum ScoreRangeIdadeEnum {
     }
 
     public static ScoreRangeIdadeEnum obterRangeDeIdade(LocalDate dataNascimentoPaciente) {
+        Logger logger = LoggerFactory.getLogger(ScoreRangeIdadeEnum.class);
+        String logCode = "obterRangeDeIdade(LocalDate)";
+        logger.info("{} - data nascimento passada {}", logCode, dataNascimentoPaciente);
+
         var dataCorrente = LocalDate.now();
         var periodoDeTempoPassadoDoNascimentoAteADataCorrente = Period.between(dataNascimentoPaciente, dataCorrente);
         var qtdeAnosIdadePaciente = periodoDeTempoPassadoDoNascimentoAteADataCorrente.getYears();
@@ -67,6 +74,7 @@ public enum ScoreRangeIdadeEnum {
 
         if (qtdeAnosIdadePaciente > 62) scoreRangeIdadeEnum = ScoreRangeIdadeEnum.MAIS_DE_62_ANOS;
 
+        logger.info("{} - score do range de idade obtido com sucesso {}", logCode, scoreRangeIdadeEnum.name());
         return scoreRangeIdadeEnum;
     }
 }

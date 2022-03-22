@@ -1,18 +1,18 @@
 package br.com.hmv.dtos.responses;
 
 import br.com.hmv.models.enums.StatusEmergenciaEnum;
-import br.com.hmv.services.validation.emergencias.criacao.EmergenciaInsertValid;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EmergenciaInsertValid
 public class EmergenciaDefaultResponseDTO {
 
     @JsonProperty("codigo_emergencia")
@@ -33,4 +33,9 @@ public class EmergenciaDefaultResponseDTO {
     @JsonProperty("detalhes_pedido_atendimento")
     private DetalhePedidoAtendimentoDefaultResponseDTO detalhesPedidoAtendimento;
 
+    @JsonProperty("data_criacao")
+    private LocalDateTime dataCriacao;
+
+    @JsonProperty("data_atualizacao")
+    private LocalDateTime dataAtualizacao;
 }

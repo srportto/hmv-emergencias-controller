@@ -13,6 +13,7 @@ import br.com.hmv.exceptions.ResourceNotFoundException;
 import br.com.hmv.models.entities.Emergencia;
 import br.com.hmv.models.entities.RegiaoDorEscala;
 import br.com.hmv.models.enums.ScoreEscalaDeDorDoPacienteEnum;
+import br.com.hmv.models.enums.ScoreRangeIdadeEnum;
 import br.com.hmv.models.enums.ScoreRegiaoDorEnum;
 import br.com.hmv.models.enums.StatusEmergenciaEnum;
 import br.com.hmv.models.mappers.EmergenciaMapper;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -146,7 +148,7 @@ public class EmergenciaService {
         entity.getDetalhesPedidoAtendimento().setRelatoEmTextoDoPedidoDeAtendimento(dto.getDetalhesPedidoAtendimento().getRelatoMotivoPedidoAtendimento());
         entity.getDetalhesPedidoAtendimento().setCodigoDetalhesPedido(UUID.randomUUID().toString());
         entity.setCodigoStatusEmergencia(dto.getStatusEmergencia().getCodigoStatusEmergencia());
-        entity.setScore(9999);
+        entity.setScore(calculaScoreAtendimento(dto));
         var detalhesPedidoAtendimento = dto.getDetalhesPedidoAtendimento();
 
         if (detalhesPedidoAtendimento.getDores() != null) {
@@ -286,6 +288,69 @@ public class EmergenciaService {
         }
 
         logger.info("{} - tabela de regiao vs escala de dor populada com sucesso {}", logCode, ScoreRegiaoDorEnum.values());
+    }
+
+    public Integer calculaScoreAtendimento(EmergenciaInsertRequestDTO dto) {
+        String logCode = "calculaScoreAtendimento(EmergenciaInsertRequestDTO)";
+        logger.info("{} - calculando score atendimento no momento da criacao do recurso {}", dto);
+
+        AtomicInteger scoreFinalCalculado = new AtomicInteger();
+        var dataNascimento = dto.getDetalhesPedidoAtendimento().getDataNascimento();
+        var scorePorIdade = ScoreRangeIdadeEnum.obterRangeDeIdade(dataNascimento);
+        scoreFinalCalculado.addAndGet(scorePorIdade.getScoreRangeIdade());
+
+        var dores = dto.getDetalhesPedidoAtendimento().getDores();
+        dores.forEach(itemDores -> {
+            var regiaoDor = itemDores.getRegiaoDor();
+            var escalaDor = itemDores.getEscalaDeDorDoPaciente();
+
+            scoreFinalCalculado.addAndGet(regiaoDor.getScoreRegiaoDor());
+            scoreFinalCalculado.addAndGet(escalaDor.getScoreEscalaDeDor());
+
+        });
+
+        var sintomas = dto.getDetalhesPedidoAtendimento().getSintomas();
+        sintomas.forEach(itemSintoma -> {
+            var relatadoPeloPaciente = itemSintoma.getRelatadoPeloPaciente();
+
+            if (relatadoPeloPaciente) {
+                var idSintoma = itemSintoma.getIdSintoma().longValue();
+                var sintomaEntity = sintomaRepository.getOne(idSintoma);
+                scoreFinalCalculado.addAndGet(sintomaEntity.getScore());
+            } else {
+                logger.info("{} - sintoma nao relatado pelo paciente {}", logCode, itemSintoma);
+            }
+        });
+
+        var habitosPaciente = dto.getDetalhesPedidoAtendimento().getHabitosPaciente();
+        habitosPaciente.forEach(itemHabitosPaciente -> {
+            var relatadoPeloPaciente = itemHabitosPaciente.getPacientePossui();
+
+            if (relatadoPeloPaciente) {
+                var idHabitoPaciente = itemHabitosPaciente.getIdHabito().longValue();
+                var habitoPacienteEntity = habitoPacienteRepository.getOne(idHabitoPaciente);
+
+                scoreFinalCalculado.addAndGet(habitoPacienteEntity.getScore());
+            } else {
+                logger.info("{} - habito nao relatado pelo paciente {}", logCode, itemHabitosPaciente);
+            }
+        });
+
+        var eventosTraumaticos = dto.getDetalhesPedidoAtendimento().getEventosTraumaticos();
+        eventosTraumaticos.forEach(itemEventotraumatico -> {
+            var relatadoPeloPaciente = itemEventotraumatico.getPacienteSofreu();
+
+            if (relatadoPeloPaciente) {
+                var idEventoTraumatico = itemEventotraumatico.getIdEvento().longValue();
+                var eventoTraumaticoEntity = eventoTraumaticoRepository.getOne(idEventoTraumatico);
+                scoreFinalCalculado.addAndGet(eventoTraumaticoEntity.getScore());
+            } else {
+                logger.info("{} - evento traumatico nao relatado pelo paciente {}", logCode, itemEventotraumatico);
+            }
+        });
+
+        logger.info("{} - score da criacao do recurso calculado com sucesso {}", logCode, scoreFinalCalculado.get());
+        return scoreFinalCalculado.get();
     }
 
 }

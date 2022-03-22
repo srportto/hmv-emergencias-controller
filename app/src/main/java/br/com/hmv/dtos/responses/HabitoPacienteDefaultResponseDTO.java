@@ -21,7 +21,9 @@ public class HabitoPacienteDefaultResponseDTO {
     @JsonProperty("score")
     private Integer score;
 
+    @JsonProperty("data_criacao")
     private LocalDateTime dataCriacao;
 
+    @JsonProperty("data_atualizacao")
     private LocalDateTime dataAtualizacao;
 }
